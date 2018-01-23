@@ -1,4 +1,4 @@
 elm-packages.json
-elm-stuff/*
+elm-stuff/
 *.pid
 .DS_Store
