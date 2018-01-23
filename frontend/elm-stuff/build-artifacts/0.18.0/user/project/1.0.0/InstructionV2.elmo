@@ -1,0 +1,248 @@
+var _user$project$InstructionV2$onChange = function (a) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'change',
+		A2(_elm_lang$core$Json_Decode$map, a, _elm_lang$html$Html_Events$targetValue));
+};
+var _user$project$InstructionV2$instructionAmountToString = function (amount) {
+	return _elm_lang$core$Basics$toString(amount);
+};
+var _user$project$InstructionV2$stringToInstructionAmount = function (amount) {
+	return A2(
+		_elm_lang$core$Result$withDefault,
+		0,
+		_elm_lang$core$String$toInt(amount));
+};
+var _user$project$InstructionV2$createInstruction = F2(
+	function (t, a) {
+		return {instructionType: t, instructionAmount: a};
+	});
+var _user$project$InstructionV2$Instruction = F2(
+	function (a, b) {
+		return {instructionType: a, instructionAmount: b};
+	});
+var _user$project$InstructionV2$Model = F2(
+	function (a, b) {
+		return {instructions: a, currentInstruction: b};
+	});
+var _user$project$InstructionV2$Empty = {ctor: 'Empty'};
+var _user$project$InstructionV2$MakeNoise = {ctor: 'MakeNoise'};
+var _user$project$InstructionV2$TurnRight = {ctor: 'TurnRight'};
+var _user$project$InstructionV2$TurnLeft = {ctor: 'TurnLeft'};
+var _user$project$InstructionV2$Backwards = {ctor: 'Backwards'};
+var _user$project$InstructionV2$Foward = {ctor: 'Foward'};
+var _user$project$InstructionV2$defaultInstruction = {instructionType: _user$project$InstructionV2$Foward, instructionAmount: 0};
+var _user$project$InstructionV2$defaultModel = {
+	instructions: {ctor: '[]'},
+	currentInstruction: _user$project$InstructionV2$defaultInstruction
+};
+var _user$project$InstructionV2$instructionTypeToString = function (iType) {
+	var _p0 = iType;
+	switch (_p0.ctor) {
+		case 'Foward':
+			return _elm_lang$core$Basics$toString(_user$project$InstructionV2$Foward);
+		case 'Backwards':
+			return _elm_lang$core$Basics$toString(_user$project$InstructionV2$Backwards);
+		case 'TurnLeft':
+			return 'Turn Left';
+		case 'TurnRight':
+			return 'Turn Right';
+		case 'MakeNoise':
+			return 'Make Noise';
+		default:
+			return '';
+	}
+};
+var _user$project$InstructionV2$stringToInstructionType = function (iType) {
+	return _elm_lang$core$Native_Utils.eq(
+		iType,
+		_user$project$InstructionV2$instructionTypeToString(_user$project$InstructionV2$Foward)) ? _user$project$InstructionV2$Foward : (_elm_lang$core$Native_Utils.eq(
+		iType,
+		_user$project$InstructionV2$instructionTypeToString(_user$project$InstructionV2$Backwards)) ? _user$project$InstructionV2$Backwards : (_elm_lang$core$Native_Utils.eq(
+		iType,
+		_user$project$InstructionV2$instructionTypeToString(_user$project$InstructionV2$TurnLeft)) ? _user$project$InstructionV2$TurnLeft : (_elm_lang$core$Native_Utils.eq(
+		iType,
+		_user$project$InstructionV2$instructionTypeToString(_user$project$InstructionV2$TurnRight)) ? _user$project$InstructionV2$TurnRight : (_elm_lang$core$Native_Utils.eq(
+		iType,
+		_user$project$InstructionV2$instructionTypeToString(_user$project$InstructionV2$MakeNoise)) ? _user$project$InstructionV2$MakeNoise : _user$project$InstructionV2$Empty))));
+};
+var _user$project$InstructionV2$update = F2(
+	function (msg, model) {
+		var _p1 = msg;
+		switch (_p1.ctor) {
+			case 'AddInstruction':
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						instructions: A2(
+							_elm_lang$core$Basics_ops['++'],
+							model.instructions,
+							{
+								ctor: '::',
+								_0: _p1._0,
+								_1: {ctor: '[]'}
+							}),
+						currentInstruction: _user$project$InstructionV2$defaultInstruction
+					});
+			case 'UpdateInstructionType':
+				var c = model.currentInstruction;
+				var updatedC = _elm_lang$core$Native_Utils.update(
+					c,
+					{
+						instructionType: _user$project$InstructionV2$stringToInstructionType(_p1._0)
+					});
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{currentInstruction: updatedC});
+			default:
+				var c = model.currentInstruction;
+				var updatedC = _elm_lang$core$Native_Utils.update(
+					c,
+					{
+						instructionAmount: _user$project$InstructionV2$stringToInstructionAmount(_p1._0)
+					});
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{currentInstruction: updatedC});
+		}
+	});
+var _user$project$InstructionV2$UpdateInstructionAmount = function (a) {
+	return {ctor: 'UpdateInstructionAmount', _0: a};
+};
+var _user$project$InstructionV2$UpdateInstructionType = function (a) {
+	return {ctor: 'UpdateInstructionType', _0: a};
+};
+var _user$project$InstructionV2$createOption = F2(
+	function (t, s) {
+		return A2(
+			_elm_lang$html$Html$option,
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html_Events$on,
+					'change',
+					_elm_lang$core$Json_Decode$succeed(
+						_user$project$InstructionV2$UpdateInstructionType(t))),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(s),
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$InstructionV2$AddInstruction = function (a) {
+	return {ctor: 'AddInstruction', _0: a};
+};
+var _user$project$InstructionV2$instructionMenu = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$id('instructionMenu'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$select,
+				{
+					ctor: '::',
+					_0: _user$project$InstructionV2$onChange(_user$project$InstructionV2$UpdateInstructionType),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$option,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Foward'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$option,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Backward'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$option,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Turn Left'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$option,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Turn Right'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$option,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('Make Noise'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$input,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$placeholder('Amount of'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onInput(_user$project$InstructionV2$UpdateInstructionAmount),
+							_1: {ctor: '[]'}
+						}
+					},
+					{ctor: '[]'}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$button,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$InstructionV2$AddInstruction(model.currentInstruction)),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Create Instruction'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _user$project$InstructionV2$view = function (model) {
+	return _user$project$InstructionV2$instructionMenu(model);
+};
+var _user$project$InstructionV2$main = _elm_lang$html$Html$beginnerProgram(
+	{model: _user$project$InstructionV2$defaultModel, view: _user$project$InstructionV2$view, update: _user$project$InstructionV2$update})();
