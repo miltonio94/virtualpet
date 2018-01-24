@@ -1,7 +1,7 @@
 module InstructionV2 exposing (..)
 
 import Html exposing (Html, beginnerProgram, div, p, text, a, button, br, input, form, fieldset, label, select, option)
-import Html.Attributes exposing (class, type_, checked, id, placeholder)
+import Html.Attributes exposing (class, type_, checked, id, placeholder, selected, value, hidden)
 import Html.Events exposing (onClick, on, onInput, targetValue)
 import Json.Decode as Json
 import String exposing (toInt)
@@ -74,16 +74,20 @@ type Msg
     = AddInstruction Instruction
     | UpdateInstructionType String
     | UpdateInstructionAmount String
+    | Submit
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         AddInstruction i ->
-            { model
-                | instructions = model.instructions ++ [ i ]
-                , currentInstruction = defaultInstruction
-            }
+            if i.instructionAmount <= 0 then
+                model
+            else
+                { model
+                    | instructions = model.instructions ++ [ i ]
+                    , currentInstruction = defaultInstruction
+                }
 
         UpdateInstructionType t ->
             let
@@ -108,6 +112,9 @@ update msg model =
                     { c | instructionAmount = (stringToInstructionAmount a) }
             in
                 { model | currentInstruction = updatedC }
+
+        Submit ->
+            { model | instructions = [] }
 
 
 stringToInstructionType : String -> InstructionType
@@ -163,37 +170,86 @@ instructionAmountToString amount =
 
 
 view model =
-    instructionMenu model
+    let
+        isInstructionEmpty =
+            List.isEmpty model.instructions
+    in
+        div
+            []
+            [ instructionMenu model
+            , renderInstructions model
+            , submitInstruction isInstructionEmpty
+            ]
 
 
-createOption t s =
+createOption : String -> InstructionType -> Html msg
+createOption text_ currentSelected =
+    -- if text_ == (instructionTypeToString currentSelected) then
     option
-        [ on "change" <|
-            Json.succeed <|
-                UpdateInstructionType t
+        [ instructionTypeToString currentSelected
+            |> (==) text_
+            |> selected
         ]
-        [ text s ]
+        [ text text_ ]
 
 
 instructionMenu : Model -> Html Msg
 instructionMenu model =
-    div
-        [ id "instructionMenu" ]
-        [ select
-            [ onChange UpdateInstructionType
+    let
+        instructionType =
+            model.currentInstruction.instructionType
+
+        innerText =
+            instructionAmountToString model.currentInstruction.instructionAmount
+    in
+        div
+            [ id "instructionMenu" ]
+            [ select
+                [ onChange UpdateInstructionType
+                ]
+                [ createOption (instructionTypeToString Foward) instructionType
+                , createOption (instructionTypeToString Backwards) instructionType
+                , createOption (instructionTypeToString TurnLeft) instructionType
+                , createOption (instructionTypeToString TurnRight) instructionType
+                , createOption (instructionTypeToString MakeNoise) instructionType
+                ]
+            , input [ placeholder "Amount of", onInput UpdateInstructionAmount, value innerText ] [ text innerText ]
+            , button
+                [ onClick (AddInstruction model.currentInstruction) ]
+                [ text "Create Instruction" ]
             ]
-            [ option [] [ text "Foward" ]
-            , option [] [ text "Backward" ]
-            , option [] [ text "Turn Left" ]
-            , option [] [ text "Turn Right" ]
-            , option [] [ text "Make Noise" ]
-            ]
-        , input [ placeholder "Amount of", onInput UpdateInstructionAmount ] []
-        , button
-            [ onClick (AddInstruction model.currentInstruction) ]
-            [ text "Create Instruction" ]
-        ]
 
 
 onChange a =
     on "change" (Json.map a targetValue)
+
+
+renderInstructions : Model -> Html Msg
+renderInstructions model =
+    let
+        instructions =
+            model.instructions
+    in
+        div
+            [ class "instructions_rendered" ]
+            (List.map renderInstruction instructions)
+
+
+submitInstruction : Bool -> Html Msg
+submitInstruction isVisible =
+    div
+        [ hidden isVisible ]
+        [ button [ onClick Submit ] [ text "Submit Instructions" ]
+        ]
+
+
+renderInstruction : Instruction -> Html Msg
+renderInstruction instruction =
+    let
+        iType =
+            instructionTypeToString instruction.instructionType
+
+        amount =
+            instructionAmountToString instruction.instructionAmount
+    in
+        div [ class "instruction" ] [ text (iType ++ " by " ++ amount) ]
