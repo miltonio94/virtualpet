@@ -1,17 +1,24 @@
 module InstructionV2 exposing (..)
 
-import Html exposing (Html, beginnerProgram, div, p, text, a, button, br, input, form, fieldset, label, select, option)
+import Html exposing (Html, program, div, p, text, a, button, br, input, form, fieldset, label, select, option)
 import Html.Attributes exposing (class, type_, checked, id, placeholder, selected, value, hidden)
 import Html.Events exposing (onClick, on, onInput, targetValue)
 import Json.Decode as Json
+import Json.Encode as EJson
 import String exposing (toInt)
+import Http
 
 
 -- import Html.Events.Extra exposing (targetValueStringParse)
 
 
 main =
-    beginnerProgram { model = defaultModel, view = view, update = update }
+    program
+        { init = ( defaultModel, Cmd.none )
+        , subscriptions = subscriptions
+        , view = view
+        , update = update
+        }
 
 
 
@@ -75,19 +82,22 @@ type Msg
     | UpdateInstructionType String
     | UpdateInstructionAmount String
     | Submit
+    | PostResult (Result Http.Error String)
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddInstruction i ->
             if i.instructionAmount <= 0 then
-                model
+                ( model, Cmd.none )
             else
-                { model
-                    | instructions = model.instructions ++ [ i ]
+                ( { model
+                    | instructions = i :: model.instructions
                     , currentInstruction = defaultInstruction
-                }
+                  }
+                , Cmd.none
+                )
 
         UpdateInstructionType t ->
             let
@@ -99,9 +109,11 @@ update msg model =
                         | instructionType = (stringToInstructionType t)
                     }
             in
-                { model
+                ( { model
                     | currentInstruction = updatedC
-                }
+                  }
+                , Cmd.none
+                )
 
         UpdateInstructionAmount a ->
             let
@@ -111,10 +123,41 @@ update msg model =
                 updatedC =
                     { c | instructionAmount = (stringToInstructionAmount a) }
             in
-                { model | currentInstruction = updatedC }
+                ( { model | currentInstruction = updatedC }, Cmd.none )
 
         Submit ->
-            { model | instructions = [] }
+            ( { model | instructions = [] }, postInstructions model )
+
+        PostResult e ->
+            ( model, Cmd.none )
+
+
+instructionsToListOfTuples : Instructions -> List EJson.Value
+instructionsToListOfTuples instructions =
+    List.map
+        (\i ->
+            EJson.object
+                [ ( "instructionType", (EJson.string <| instructionTypeToString <| i.instructionType) )
+                , ( "instructionAmount", EJson.string <| instructionAmountToString <| i.instructionAmount )
+                ]
+        )
+        instructions
+
+
+postInstructions model =
+    let
+        data =
+            instructionsToListOfTuples model.instructions
+
+        post =
+            Http.post
+                "/postInstructions"
+                (Http.jsonBody
+                    (EJson.list data)
+                )
+                Json.string
+    in
+        Http.send PostResult post
 
 
 stringToInstructionType : String -> InstructionType
@@ -253,3 +296,12 @@ renderInstruction instruction =
             instructionAmountToString instruction.instructionAmount
     in
         div [ class "instruction" ] [ text (iType ++ " by " ++ amount) ]
+
+
+
+-- subscriptions
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
